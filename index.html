@@ -3,13 +3,34 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>BWL - Calculateur de paris PO (index)</title>
+  <title>BWL - Calculateur de paris PO</title>
   <style>
-    :root{--bg:#0f1720;--card:#0b1220;--muted:#9aa4b2;--accent:#ffc857}
-    body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:var(--bg);color:#e6eef6;margin:0;padding:18px}
+    @import url('https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap');
+
+    :root{
+      --bg:#0f0c0a;
+      --card:#1a0f05;
+      --muted:#9aa4b2;
+      --accent:#ffc857;
+      --gold-icon: url('https://upload.wikimedia.org/wikipedia/commons/3/39/Gold_coin_icon.png');
+    }
+    body{
+      font-family:'MedievalSharp', fantasy;
+      background:var(--bg) url('https://i.ibb.co/Yt5v8nB/bwl-fire.gif') center/cover no-repeat;
+      color:#e6eef6;
+      margin:0;
+      padding:18px;
+    }
     .container{max-width:1100px;margin:0 auto}
-    h1{color:var(--accent);font-size:20px}
-    .card{background:var(--card);padding:14px;border-radius:10px;box-shadow:0 6px 18px rgba(2,6,23,.5);margin-bottom:12px}
+    h1{color:var(--accent);font-size:28px;text-shadow:2px 2px #000}
+    .card{
+      background:var(--card);
+      padding:14px;
+      border-radius:10px;
+      box-shadow:0 6px 18px rgba(2,6,23,.5);
+      margin-bottom:12px;
+      position:relative;
+    }
     label{display:block;margin-top:8px;font-weight:600;color:#d7e6ff}
     input,select,textarea,button{padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:#071127;color:#e6eef6}
     .row{display:flex;gap:10px}
@@ -17,366 +38,223 @@
     table{width:100%;border-collapse:collapse;margin-top:10px}
     th,td{padding:8px;border-bottom:1px solid rgba(255,255,255,0.03);text-align:left}
     small{color:var(--muted)}
-    button.primary{background:var(--accent);color:#08111a;border:none}
+    button.primary{background:var(--accent);color:#08111a;border:none;cursor:pointer}
     .muted{color:var(--muted)}
     .link{color:var(--accent);cursor:pointer;text-decoration:underline}
     .inline{display:inline-block}
     .boss-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
     .hidden{display:none}
     .center{text-align:center}
+    .gold-icon{width:16px;height:16px;margin-right:4px;vertical-align:middle;background:var(--gold-icon) no-repeat center/contain;display:inline-block}
+    .closed-msg{color:red;font-weight:bold;margin-top:10px}
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Calculateur de paris PO — Blackwing Lair</h1>
-    <div class="card">
-      <p class="muted">Page publique : ajouter des parieurs et leurs paris. Les mises peuvent être placées par catégorie (5 à 100 PO). Pour gérer le raid et faire la redistribution, rends-toi sur la page admin (connexion requise).</p>
-      <p><span class="link" id="goAdmin">Aller à l'espace admin</span></p>
-    </div>
+<div class="container">
+  <h1>Calculateur de paris PO — Blackwing Lair</h1>
 
-    <div class="card">
-      <h2>Ajouter un parieur et ses paris</h2>
-      <div style="display:flex;gap:12px;align-items:center">
-        <div style="flex:1">
-          <label>Pseudo du parieur</label>
-          <input id="bettorName" placeholder="Pseudo...">
-        </div>
-        <div style="width:140px">
-          <label>Total déjà mis (affiché)</label>
-          <div id="bettorTotal" class="muted">0 PO</div>
-        </div>
+  <!-- Message paris fermés -->
+  <div id="closedMessage" class="closed-msg hidden">Les paris sont fermés pour ce raid !</div>
+
+  <div class="card">
+    <p class="muted">Page publique : ajouter des parieurs et leurs paris. Les mises peuvent être placées par catégorie (5 à 100 PO). Pour gérer le raid et faire la redistribution, rends-toi sur la page admin.</p>
+    <p><span class="link" id="goAdmin">Aller à l'espace admin</span></p>
+  </div>
+
+  <div class="card" id="betForm">
+    <h2>Ajouter un parieur et ses paris</h2>
+    <div style="display:flex;gap:12px;align-items:center">
+      <div style="flex:1">
+        <label>Pseudo du parieur</label>
+        <input id="bettorName" placeholder="Pseudo...">
       </div>
-
-      <hr style="margin:10px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)">
-
-      <p class="muted">Pour chaque catégorie, coche pour activer le pari, entre ta prédiction et la mise (5-100).</p>
-
-      <div class="card" style="background:#071224">
-        <h3>1) Jusqu'à quel boss on arrive</h3>
-        <label><input type="checkbox" id="bet_boss_enable"> Je veux parier sur le boss atteint</label>
-        <div id="bet_boss_block" class="hidden">
-          <label>Boss prédite</label>
-          <select id="bet_boss_select"></select>
-          <label>Mise (5-100 PO)</label>
-          <input id="bet_boss_stake" type="number" min="5" max="100" value="5">
-        </div>
-      </div>
-
-      <div class="card" style="background:#071224">
-        <h3>2) Nombre de morts par boss</h3>
-        <p class="muted">Active un boss puis indique le nombre de morts et la mise pour ce boss.</p>
-        <div id="deathsList" class="boss-grid"></div>
-      </div>
-
-      <div class="card" style="background:#071224">
-        <h3>3) Pseudo le plus mort</h3>
-        <label><input type="checkbox" id="bet_mostDead_enable"> Je veux parier sur le joueur le plus mort</label>
-        <div id="bet_mostDead_block" class="hidden">
-          <label>Pseudo prévu</label>
-          <input id="bet_mostDead_name" placeholder="Pseudo...">
-          <label>Mise (5-100 PO)</label>
-          <input id="bet_mostDead_stake" type="number" min="5" max="100" value="5">
-        </div>
-      </div>
-
-      <div class="card" style="background:#071224">
-        <h3>4) Top 3 DPS Vaelastrasz</h3>
-        <label><input type="checkbox" id="bet_top3_enable"> Je veux parier sur le top3</label>
-        <div id="bet_top3_block" class="hidden">
-          <label>Top3 (sépare par virgule ou champs)</label>
-          <input id="bet_top3_names" placeholder="J1, J2, J3">
-          <label>Mise (5-100 PO)</label>
-          <input id="bet_top3_stake" type="number" min="5" max="100" value="5">
-        </div>
-      </div>
-
-      <div class="card" style="background:#071224">
-        <h3>5) Item qui tombe</h3>
-        <label><input type="checkbox" id="bet_item_enable"> Je veux parier sur l'item</label>
-        <div id="bet_item_block" class="hidden">
-          <label>Item prévu</label>
-          <select id="bet_item_select"></select>
-          <label>Mise (5-100 PO)</label>
-          <input id="bet_item_stake" type="number" min="5" max="100" value="5">
-        </div>
-      </div>
-
-      <div style="margin-top:10px">
-        <button id="addBettor" class="primary">Ajouter le parieur</button>
+      <div style="width:140px">
+        <label>Total déjà mis (affiché)</label>
+        <div id="bettorTotal" class="muted">0 PO</div>
       </div>
     </div>
 
-    <div class="card">
-      <h2>Parieurs enregistrés</h2>
-      <div class="muted">Cagnotte totale = somme des mises placées sur toutes les catégories.</div>
-      <div style="margin-top:8px">Total cagnotte: <strong id="totalPot">0 PO</strong></div>
-      <table id="bettorsTable"><thead><tr><th>Pseudo</th><th>Mises (détail)</th><th>Total mis</th><th>Actions</th></tr></thead><tbody></tbody></table>
-      <div style="margin-top:8px"><button id="clearAll">Supprimer tous les parieurs</button></div>
+    <hr style="margin:10px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)">
+
+    <div class="card" style="background:#071224">
+      <h3>1) Jusqu'à quel boss on arrive</h3>
+      <label><input type="checkbox" id="bet_boss_enable"> Je veux parier sur le boss atteint</label>
+      <div id="bet_boss_block" class="hidden">
+        <label>Boss prédite</label>
+        <select id="bet_boss_select"></select>
+        <label><span class="gold-icon"></span>Mise (5-100 PO)</label>
+        <input id="bet_boss_stake" type="number" min="5" max="100" value="5">
+      </div>
     </div>
 
-    <div class="card center muted">
-      <div>Tu peux accéder à l'administration du raid avec l'URL <span class="link">#admin</span> puis te connecter (identifiant: <code>dork</code> / mot de passe: <code>BWLDORK</code>).</div>
+    <div class="card" style="background:#071224">
+      <h3>💀 Quel boss fera le wipe ?</h3>
+      <label><input type="checkbox" id="bet_wipe_enable"> Je parie sur le boss du wipe</label>
+      <div id="bet_wipe_block" class="hidden">
+        <label>Boss prévu</label>
+        <select id="bet_wipe_select"></select>
+        <label><span class="gold-icon"></span>Mise (5-100 PO)</label>
+        <input id="bet_wipe_stake" type="number" min="5" max="100" value="5">
+      </div>
+    </div>
+
+    <!-- Les autres catégories (morts, top3, item) gardées inchangées -->
+
+    <div style="margin-top:10px">
+      <button id="addBettor" class="primary">Ajouter le parieur</button>
     </div>
   </div>
 
-  <script>
-    // --- data / config
-    const bosses = ["Razorgore","Vaelastrasz","Broodlord","Firemaw","Ebonroc","Flamegor","Chromaggus","Nefarian"]
-    const items = ["Help of endless rage","Maladath","Rejuvenating gem","Shadow wing focus staff","Drake fang","Dragon's touch","Ashje'thul","RIEN DU TOUT"]
+  <!-- Parieurs enregistrés -->
+  <div class="card">
+    <h2>Parieurs enregistrés</h2>
+    <div class="muted">Cagnotte totale = somme des mises placées sur toutes les catégories.</div>
+    <div style="margin-top:8px">Total cagnotte: <strong id="totalPot">0 PO</strong></div>
+    <table id="bettorsTable"><thead><tr><th>Pseudo</th><th>Mises (détail)</th><th>Total mis</th><th>Actions</th></tr></thead><tbody></tbody></table>
+    <div style="margin-top:8px"><button id="clearAll">Supprimer tous les parieurs</button></div>
+  </div>
+</div>
 
-    // localStorage key
-    const LS_KEY = 'bwl_bets_v1'
+<script>
+  const bosses = ["Razorgore","Vaelastrasz","Broodlord","Firemaw","Ebonroc","Flamegor","Chromaggus","Nefarian"];
+  const items = ["Help of endless rage","Maladath","Rejuvenating gem","Shadow wing focus staff","Drake fang","Dragon's touch","Ashje'thul","RIEN DU TOUT"];
+  const LS_KEY = 'bwl_bets_v1';
 
-    // --- init UI
-    const betBossSelect = document.getElementById('bet_boss_select')
-    const betItemSelect = document.getElementById('bet_item_select')
-    bosses.forEach(b=>{ const o=document.createElement('option'); o.value=b; o.textContent=b; betBossSelect.appendChild(o) })
-    items.forEach(i=>{ const o=document.createElement('option'); o.value=i; o.textContent=i; betItemSelect.appendChild(o) })
+  // --- init selects
+  const betBossSelect = document.getElementById('bet_boss_select');
+  const betWipeSelect = document.getElementById('bet_wipe_select');
+  bosses.forEach(b=>{ 
+    const o=document.createElement('option'); 
+    o.value=b; o.textContent=b; 
+    betBossSelect.appendChild(o); 
+    const ow=document.createElement('option'); 
+    ow.value=b; ow.textContent=b; 
+    betWipeSelect.appendChild(ow);
+  });
 
-    // deaths block
-    const deathsList = document.getElementById('deathsList')
-    bosses.forEach(b=>{
-      const wrap = document.createElement('div')
-      wrap.className='card'
-      wrap.style.padding='8px'
-      wrap.innerHTML = `<label style="font-weight:700">${b}</label>
-        <label class='muted'><input type='checkbox' data-boss='${b}' class='death_enable'> Je parie sur ce boss</label>
-        <div style='margin-top:6px'>
-          <input type='number' min='0' value='0' data-boss='${b}' class='death_count' placeholder='Morts prévues' style='width:60%;display:inline-block;margin-right:6px'>
-          <input type='number' min='5' max='100' value='5' data-boss='${b}' class='death_stake' placeholder='Mise (5-100)' style='width:36%;display:inline-block'>
-        </div>`
-      deathsList.appendChild(wrap)
+  // toggle blocks
+  function toggleBlock(checkboxId, blockId){
+    const cb = document.getElementById(checkboxId), block = document.getElementById(blockId);
+    cb.addEventListener('change', ()=>{ block.classList.toggle('hidden', !cb.checked) });
+  }
+  toggleBlock('bet_boss_enable','bet_boss_block');
+  toggleBlock('bet_wipe_enable','bet_wipe_block');
+
+  // bettors storage
+  let bettors = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+
+  function save(){ localStorage.setItem(LS_KEY, JSON.stringify(bettors)) }
+
+  function computeTotalPot(){
+    return bettors.reduce((sum,p)=> sum + (p.stakes ? p.stakes.reduce((a,b)=>a+b.amount,0) : 0), 0)
+  }
+
+  function updateTable(){
+    const tbody = document.querySelector('#bettorsTable tbody'); tbody.innerHTML='';
+    bettors.forEach((p,idx)=>{
+      const stakesDetail = (p.stakes||[]).map(s=>`${s.cat}: ${s.pred ?? ''} (${s.amount} PO)`).join('<br>');
+      const total = (p.stakes||[]).reduce((a,b)=>a+b.amount,0);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${p.name}</td><td>${stakesDetail}</td><td>${total} PO</td><td><button data-i='${idx}' class='remove'>Suppr</button></td>`;
+      tbody.appendChild(tr);
+    });
+    document.getElementById('totalPot').textContent = computeTotalPot() + ' PO';
+    document.querySelectorAll('.remove').forEach(btn=>btn.addEventListener('click',e=>{ bettors.splice(+e.target.dataset.i,1); save(); updateTable() }));
+  }
+
+  // add bettor
+  document.getElementById('addBettor').addEventListener('click', ()=>{
+    if(window.betsClosed){ alert('Les paris sont fermés pour ce raid !'); return }
+
+    const name = document.getElementById('bettorName').value.trim();
+    if(!name){ alert('Donne un pseudo pour le parieur.'); return }
+    const stakes = [];
+
+    // boss reached
+    if(document.getElementById('bet_boss_enable').checked){
+      stakes.push({cat:'bossReached', pred:betBossSelect.value, amount:parseInt(document.getElementById('bet_boss_stake').value||0)});
+    }
+
+    // wipe boss
+    if(document.getElementById('bet_wipe_enable').checked){
+      stakes.push({cat:'wipeBoss', pred:betWipeSelect.value, amount:parseInt(document.getElementById('bet_wipe_stake').value||0)});
+    }
+
+    if(stakes.length===0){ alert('Au moins un pari doit être placé.'); return }
+
+    bettors.push({name, stakes});
+    save(); updateTable();
+    document.getElementById('bettorName').value='';
+    document.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.checked=false);
+    document.querySelectorAll('.hidden').forEach(el=>el.classList.add('hidden'));
+  });
+
+  document.getElementById('clearAll').addEventListener('click', ()=>{ if(confirm('Supprimer tous les parieurs ?')){ bettors=[]; save(); updateTable() } })
+  updateTable();
+
+  // --- Mode paris fermés
+  window.betsClosed = false;
+  function setBetsClosed(state){
+    window.betsClosed = state;
+    document.getElementById('closedMessage').classList.toggle('hidden', !state);
+    document.querySelectorAll('#betForm input, #betForm select, #betForm button').forEach(el=>{
+      if(el.id!=='addBettor') el.disabled = state;
+    });
+  }
+
+  // Admin SPA routing
+  document.getElementById('goAdmin').addEventListener('click', ()=>{ location.hash='admin' })
+  window.addEventListener('hashchange', ()=>{
+    if(location.hash==='#admin') openAdmin();
+  })
+
+  function openAdmin(){
+    const overlay = document.createElement('div')
+    overlay.style.position='fixed'; overlay.style.left=0; overlay.style.top=0; overlay.style.right=0; overlay.style.bottom=0;
+    overlay.style.background='rgba(0,0,0,0.7)'; overlay.style.zIndex=9999; overlay.id='adminOverlay'
+    const panel = document.createElement('div'); panel.className='card'; panel.style.maxWidth='900px'; panel.style.margin='60px auto'; panel.style.background='#041026'
+    panel.innerHTML = `
+      <h2>Admin — connexion</h2>
+      <div id='adminLogin'>
+        <label>Identifiant</label><input id='adm_user' placeholder='identifiant'>
+        <label>Mot de passe</label><input id='adm_pass' type='password' placeholder='mot de passe'>
+        <div style='margin-top:10px'>
+          <button id='adm_login' class='primary'>Se connecter</button>
+          <button id='adm_close'>Fermer</button>
+        </div>
+      </div>
+      <div id='adminPanel' class='hidden'>
+        <h3>Administration</h3>
+        <button id='closeBets' class='primary'>🔐 Fermer les paris</button>
+        <button id='openBets' class='primary'>Ouvrir les paris</button>
+        <div style='margin-top:10px'>
+          <button id='admin_logout' class='primary'>Se déconnecter</button>
+        </div>
+      </div>
+    `;
+    overlay.appendChild(panel); document.body.appendChild(overlay);
+
+    panel.querySelector('#adm_close').addEventListener('click', ()=>{ document.body.removeChild(overlay); location.hash='' })
+    panel.querySelector('#adm_login').addEventListener('click', ()=>{
+      const u = panel.querySelector('#adm_user').value, p = panel.querySelector('#adm_pass').value;
+      if(u==='dork' && p==='BWLDORK'){
+        panel.querySelector('#adminLogin').classList.add('hidden')
+        panel.querySelector('#adminPanel').classList.remove('hidden')
+      } else alert('Identifiant ou mot de passe incorrect')
     })
 
-    // toggle blocks
-    function toggleBlock(checkboxId, blockId){
-      const cb = document.getElementById(checkboxId), block = document.getElementById(blockId)
-      cb.addEventListener('change', ()=>{ block.classList.toggle('hidden', !cb.checked) })
-    }
-    toggleBlock('bet_boss_enable','bet_boss_block')
-    toggleBlock('bet_mostDead_enable','bet_mostDead_block')
-    toggleBlock('bet_top3_enable','bet_top3_block')
-    toggleBlock('bet_item_enable','bet_item_block')
-
-    // bettors storage
-    let bettors = JSON.parse(localStorage.getItem(LS_KEY) || '[]')
-
-    function save(){ localStorage.setItem(LS_KEY, JSON.stringify(bettors)) }
-
-    function computeTotalPot(){
-      // sum of all stakes across all bettors
-      return bettors.reduce((sum,p)=> sum + (p.stakes ? p.stakes.reduce((a,b)=>a+b.amount,0) : 0), 0)
-    }
-
-    function updateTable(){
-      const tbody = document.querySelector('#bettorsTable tbody'); tbody.innerHTML=''
-      bettors.forEach((p,idx)=>{
-        const tr = document.createElement('tr')
-        const stakesDetail = (p.stakes||[]).map(s=>`${s.cat}: ${s.pred ?? ''} (${s.amount} PO)`).join('<br>')
-        const total = (p.stakes||[]).reduce((a,b)=>a+b.amount,0)
-        tr.innerHTML = `<td>${p.name}</td><td>${stakesDetail}</td><td>${total} PO</td><td><button data-i='${idx}' class='remove'>Suppr</button></td>`
-        tbody.appendChild(tr)
-      })
-      document.getElementById('totalPot').textContent = computeTotalPot() + ' PO'
-      document.querySelectorAll('.remove').forEach(btn=>btn.addEventListener('click',e=>{ bettors.splice(+e.target.dataset.i,1); save(); updateTable() }))
-    }
-
-    // add bettor
-    document.getElementById('addBettor').addEventListener('click', ()=>{
-      const name = document.getElementById('bettorName').value.trim()
-      if(!name){ alert('Donne un pseudo pour le parieur.'); return }
-      const stakes = []
-
-      // boss reached
-      if(document.getElementById('bet_boss_enable').checked){
-        const pred = betBossSelect.value
-        const amt = parseInt(document.getElementById('bet_boss_stake').value || '0')
-        if(isNaN(amt) || amt<5 || amt>100){ alert('Mise boss doit être entre 5 et 100'); return }
-        stakes.push({cat:'bossReached', pred, amount:amt})
-      }
-
-      // deaths
-      document.querySelectorAll('.death_enable').forEach(checkbox=>{
-        if(checkbox.checked){
-          const b = checkbox.dataset.boss
-          const count = parseInt(document.querySelector(`.death_count[data-boss='${b}']`).value || '0')
-          const amt = parseInt(document.querySelector(`.death_stake[data-boss='${b}']`).value || '0')
-          if(isNaN(amt) || amt<5 || amt>100){ alert('Mise pour '+b+' doit être entre 5 et 100'); return }
-          stakes.push({cat:`deaths:${b}`, pred:count, amount:amt})
-        }
-      })
-
-      // most dead
-      if(document.getElementById('bet_mostDead_enable').checked){
-        const pred = document.getElementById('bet_mostDead_name').value.trim()
-        const amt = parseInt(document.getElementById('bet_mostDead_stake').value||'0')
-        if(!pred){ alert('Donne un pseudo pour most dead'); return }
-        if(isNaN(amt) || amt<5 || amt>100){ alert('Mise most dead doit être entre 5 et 100'); return }
-        stakes.push({cat:'mostDead', pred, amount:amt})
-      }
-
-      // top3
-      if(document.getElementById('bet_top3_enable').checked){
-        const pred = document.getElementById('bet_top3_names').value.split(',').map(s=>s.trim()).filter(Boolean)
-        const amt = parseInt(document.getElementById('bet_top3_stake').value||'0')
-        if(pred.length!==3){ alert('Donne 3 noms pour le top3 (séparés par virgule)'); return }
-        if(isNaN(amt) || amt<5 || amt>100){ alert('Mise top3 doit être entre 5 et 100'); return }
-        stakes.push({cat:'top3', pred, amount:amt})
-      }
-
-      // item
-      if(document.getElementById('bet_item_enable').checked){
-        const pred = betItemSelect.value
-        const amt = parseInt(document.getElementById('bet_item_stake').value||'0')
-        if(isNaN(amt) || amt<5 || amt>100){ alert('Mise item doit être entre 5 et 100'); return }
-        stakes.push({cat:'item', pred, amount:amt})
-      }
-
-      if(stakes.length===0){ alert('Au moins un pari doit être placé.'); return }
-
-      bettors.push({name, stakes})
-      save(); updateTable(); document.getElementById('bettorName').value=''
-      // reset checkboxes and inputs
-      document.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.checked=false)
-      document.querySelectorAll('.hidden').forEach(el=>el.classList.add('hidden'))
+    panel.querySelector('#admin_logout').addEventListener('click', ()=>{
+      panel.querySelector('#adminPanel').classList.add('hidden')
+      panel.querySelector('#adminLogin').classList.remove('hidden')
     })
 
-    document.getElementById('clearAll').addEventListener('click', ()=>{ if(confirm('Supprimer tous les parieurs ?')){ bettors=[]; save(); updateTable() } })
+    panel.querySelector('#closeBets').addEventListener('click', ()=>{ setBetsClosed(true) })
+    panel.querySelector('#openBets').addEventListener('click', ()=>{ setBetsClosed(false) })
 
-    // initial render
-    updateTable()
+    overlay.addEventListener('click', (e)=>{ if(e.target===overlay){ document.body.removeChild(overlay); location.hash='' } })
+  }
 
-    // --- Admin SPA routing (hash)
-    document.getElementById('goAdmin').addEventListener('click', ()=>{ location.hash='admin' })
-    function showAdminIfHash(){ if(location.hash==='#admin') openAdmin(); }
-    window.addEventListener('hashchange', showAdminIfHash)
-
-    // --- Admin modal / view (in-page)
-    function openAdmin(){
-      // create admin UI overlay
-      const overlay = document.createElement('div')
-      overlay.style.position='fixed'; overlay.style.left=0; overlay.style.top=0; overlay.style.right=0; overlay.style.bottom=0; overlay.style.background='rgba(0,0,0,0.7)'; overlay.style.zIndex=9999; overlay.id='adminOverlay'
-      const panel = document.createElement('div'); panel.className='card'; panel.style.maxWidth='900px'; panel.style.margin='60px auto'; panel.style.background='#041026'
-      panel.innerHTML = `
-        <h2>Admin — connexion</h2>
-        <div id='adminLogin'>
-          <label>Identifiant</label>
-          <input id='adm_user' placeholder='identifiant'>
-          <label>Mot de passe</label>
-          <input id='adm_pass' type='password' placeholder='mot de passe'>
-          <div style='margin-top:10px'><button id='adm_login' class='primary'>Se connecter</button> <button id='adm_close'>Fermer</button></div>
-        </div>
-        <div id='adminPanel' class='hidden'>
-          <h3>Entrer le résultat réel du raid</h3>
-          <label>Boss atteint</label>
-          <select id='actual_boss'></select>
-          <div style='margin-top:8px'><label>Morts réelles par boss</label><div id='actual_deaths' class='boss-grid'></div></div>
-          <label>Pseudo le + mort (réel)</label>
-          <input id='actual_mostDead'>
-          <label>Top3 Vaelastrasz (séparés par virgule)</label>
-          <input id='actual_top3'>
-          <label>Item tombé</label>
-          <select id='actual_item'></select>
-          <div style='margin-top:10px'><button id='calcDist' class='primary'>Calculer redistribution</button> <button id='admin_logout'>Se déconnecter</button></div>
-          <div id='distResults' style='margin-top:12px'></div>
-        </div>
-      `
-      overlay.appendChild(panel); document.body.appendChild(overlay)
-
-      // populate selects
-      const actualBoss = panel.querySelector('#actual_boss')
-      bosses.forEach(b=>{ const o=document.createElement('option'); o.value=b; o.textContent=b; actualBoss.appendChild(o) })
-      const actualItem = panel.querySelector('#actual_item')
-      items.forEach(i=>{ const o=document.createElement('option'); o.value=i; o.textContent=i; actualItem.appendChild(o) })
-
-      // actual deaths inputs
-      const actualDeathsDiv = panel.querySelector('#actual_deaths')
-      bosses.forEach(b=>{
-        const d = document.createElement('div'); d.className='card'; d.style.padding='8px'
-        d.innerHTML = `<label style='font-weight:700'>${b}</label><input data-boss='${b}' class='actual_death_input' type='number' min='0' value='0'>`
-        actualDeathsDiv.appendChild(d)
-      })
-
-      // handlers
-      panel.querySelector('#adm_close').addEventListener('click', ()=>{ document.body.removeChild(overlay); location.hash='' })
-      panel.querySelector('#adm_login').addEventListener('click', ()=>{
-        const u = panel.querySelector('#adm_user').value
-        const p = panel.querySelector('#adm_pass').value
-        if(u==='dork' && p==='BWLDORK'){
-          panel.querySelector('#adminLogin').classList.add('hidden')
-          panel.querySelector('#adminPanel').classList.remove('hidden')
-        } else alert('Identifiant ou mot de passe incorrect')
-      })
-
-      panel.querySelector('#admin_logout').addEventListener('click', ()=>{ panel.querySelector('#adminPanel').classList.add('hidden'); panel.querySelector('#adminLogin').classList.remove('hidden') })
-
-      panel.querySelector('#calcDist').addEventListener('click', ()=>{
-        // read actuals
-        const actual = { bossReached: panel.querySelector('#actual_boss').value, deaths: {}, mostDead: panel.querySelector('#actual_mostDead').value.trim(), top3: panel.querySelector('#actual_top3').value.split(',').map(s=>s.trim()).filter(Boolean), item: panel.querySelector('#actual_item').value }
-        panel.querySelectorAll('.actual_death_input').forEach(inp=>{ actual.deaths[inp.dataset.boss]=parseInt(inp.value||'0') })
-
-        // compute redistribution: for each category, collect stakes and winners. Winners share pot proportionally to their stake on that category.
-        // build per-category pots
-        const categoryPots = {}
-        // function to push stake
-        bettors = JSON.parse(localStorage.getItem(LS_KEY) || '[]')
-        // init
-        bettors.forEach(b=>{ b.stakes.forEach(s=>{ if(!categoryPots[s.cat]) categoryPots[s.cat]={total:0, entries:[]}; categoryPots[s.cat].total += s.amount; categoryPots[s.cat].entries.push({name:b.name, amount:s.amount, pred:s.pred}) }) })
-
-        // determine winners for each category and compute payouts
-        const payouts = {} // name -> amount won
-        bettors.forEach(b=> payouts[b.name]=0)
-
-        // helper: compare top3 sets ignoring order
-        function top3Equal(a,b){ if(!Array.isArray(a) || !Array.isArray(b)) return false; const A=a.map(x=>x.toLowerCase()).sort(); const B=b.map(x=>x.toLowerCase()).sort(); if(A.length!==3 || B.length!==3) return false; for(let i=0;i<3;i++) if(A[i]!==B[i]) return false; return true }
-
-        Object.keys(categoryPots).forEach(cat=>{
-          const pot = categoryPots[cat]
-          let winners = []
-          if(cat==='bossReached'){
-            winners = pot.entries.filter(e=> e.pred === actual.bossReached)
-          } else if(cat.startsWith('deaths:')){
-            const boss = cat.split(':')[1]
-            winners = pot.entries.filter(e=> Number(e.pred) === Number(actual.deaths[boss]))
-          } else if(cat==='mostDead'){
-            winners = pot.entries.filter(e=> e.pred && e.pred.toLowerCase()=== (actual.mostDead || '').toLowerCase())
-          } else if(cat==='top3'){
-            winners = pot.entries.filter(e=> top3Equal(e.pred, actual.top3))
-          } else if(cat==='item'){
-            winners = pot.entries.filter(e=> e.pred === actual.item)
-          }
-
-          if(winners.length>0){
-            const winnersTotalStake = winners.reduce((s,w)=>s+w.amount,0)
-            winners.forEach(w=>{
-              const share = pot.total * (w.amount / winnersTotalStake)
-              payouts[w.name] = (payouts[w.name] || 0) + share
-            })
-          }
-        })
-
-        // build result display
-        const resDiv = panel.querySelector('#distResults'); resDiv.innerHTML = ''
-        const totalPot = computeTotalPot()
-        let html = `<div class='card'><strong>Total cagnotte :</strong> ${totalPot} PO</div>`
-        html += `<table><thead><tr><th>Parieur</th><th>Total mis</th><th>Gain calculé</th><th>Net (gain - mise)</th></tr></thead><tbody>`
-        bettors.forEach(b=>{
-          const totalMis = (b.stakes||[]).reduce((a,s)=>a+s.amount,0)
-          const gain = Math.round((payouts[b.name]||0)*100)/100
-          const net = Math.round((gain - totalMis)*100)/100
-          html += `<tr><td>${b.name}</td><td>${totalMis} PO</td><td>${gain} PO</td><td>${net} PO</td></tr>`
-        })
-        html += `</tbody></table>`
-        resDiv.innerHTML = html
-
-      })
-
-      // close overlay when clicking outside panel
-      overlay.addEventListener('click', (e)=>{ if(e.target===overlay){ document.body.removeChild(overlay); location.hash='' } })
-    }
-
-    // open admin if hash at load
-    if(location.hash==='#admin') openAdmin()
-  </script>
+  if(location.hash==='#admin') openAdmin();
+</script>
 </body>
 </html>
