@@ -1,81 +1,95 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>BWL - Calculateur de paris PO</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap');
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>BWL - Calculateur de paris PO</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap');
 
-    :root{
-      --bg:#0f0c0a;
-      --card:#1a0f05;
-      --muted:#9aa4b2;
-      --accent:#ffc857;
-      --gold-icon: url('https://upload.wikimedia.org/wikipedia/commons/3/39/Gold_coin_icon.png');
-    }
-    body{
-      font-family:'MedievalSharp', fantasy;
-      background:var(--bg) url('https://i.ibb.co/Yt5v8nB/bwl-fire.gif') center/cover no-repeat;
-      color:#e6eef6;
-      margin:0;
-      padding:18px;
-    }
-    .container{max-width:1100px;margin:0 auto}
-    h1{color:var(--accent);font-size:28px;text-shadow:2px 2px #000}
-    .card{
-      background:var(--card);
-      padding:14px;
-      border-radius:10px;
-      box-shadow:0 6px 18px rgba(2,6,23,.5);
-      margin-bottom:12px;
-      position:relative;
-    }
-    label{display:block;margin-top:8px;font-weight:600;color:#d7e6ff}
-    input,select,textarea,button{padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:#071127;color:#e6eef6}
-    .row{display:flex;gap:10px}
-    .col{flex:1}
-    table{width:100%;border-collapse:collapse;margin-top:10px}
-    th,td{padding:8px;border-bottom:1px solid rgba(255,255,255,0.03);text-align:left}
-    small{color:var(--muted)}
-    button.primary{background:var(--accent);color:#08111a;border:none;cursor:pointer}
-    .muted{color:var(--muted)}
-    .link{color:var(--accent);cursor:pointer;text-decoration:underline}
-    .inline{display:inline-block}
-    .boss-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-    .hidden{display:none}
-    .center{text-align:center}
-    .gold-icon{width:16px;height:16px;margin-right:4px;vertical-align:middle;background:var(--gold-icon) no-repeat center/contain;display:inline-block}
-    .closed-msg{color:red;font-weight:bold;margin-top:10px}
-  </style>
+:root{
+  --bg:#0f0c0a;
+  --card:#1a0f05;
+  --muted:#9aa4b2;
+  --accent:#ffc857;
+  --gold-icon: url('https://upload.wikimedia.org/wikipedia/commons/3/39/Gold_coin_icon.png');
+}
+body{
+  font-family:'MedievalSharp', fantasy;
+  background:var(--bg) url('https://i.ibb.co/Yt5v8nB/bwl-fire.gif') center/cover no-repeat;
+  color:#e6eef6;
+  margin:0;padding:18px;
+}
+.container{max-width:1100px;margin:0 auto}
+h1,h2,h3{color:var(--accent);text-shadow:2px 2px #000}
+.card{
+  background:var(--card);
+  padding:14px;
+  border-radius:10px;
+  box-shadow:0 6px 18px rgba(2,6,23,.5);
+  margin-bottom:12px;
+  position:relative;
+}
+label{display:block;margin-top:8px;font-weight:600;color:#d7e6ff}
+input,select,textarea,button{padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:#071127;color:#e6eef6}
+.row{display:flex;gap:10px}
+.col{flex:1}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{padding:8px;border-bottom:1px solid rgba(255,255,255,0.03);text-align:left}
+small{color:var(--muted)}
+button.primary{background:var(--accent);color:#08111a;border:none;cursor:pointer}
+.muted{color:var(--muted)}
+.link{color:var(--accent);cursor:pointer;text-decoration:underline}
+.inline{display:inline-block}
+.boss-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.hidden{display:none}
+.center{text-align:center}
+.gold-icon{width:16px;height:16px;margin-right:4px;vertical-align:middle;background:var(--gold-icon) no-repeat center/contain;display:inline-block}
+.closed-msg{color:red;font-weight:bold;margin-top:10px}
+</style>
 </head>
 <body>
 <div class="container">
-  <h1>Calculateur de paris PO — Blackwing Lair</h1>
+
+<h1>Blackwing Lair — Paris PO</h1>
+
+<!-- PAGE LOGIN -->
+<div id="loginPage" class="card center">
+  <h2>Connecte-toi pour parier</h2>
+  <label>Pseudo</label>
+  <input id="loginName" placeholder="Ton pseudo">
+  <div style="margin-top:10px">
+    <button id="loginBtn" class="primary">Se connecter</button>
+  </div>
+</div>
+
+<!-- PAGE PARIS -->
+<div id="betPage" class="hidden">
 
   <!-- Message paris fermés -->
   <div id="closedMessage" class="closed-msg hidden">Les paris sont fermés pour ce raid !</div>
 
   <div class="card">
-    <p class="muted">Page publique : ajouter des parieurs et leurs paris. Les mises peuvent être placées par catégorie (5 à 100 PO). Pour gérer le raid et faire la redistribution, rends-toi sur la page admin.</p>
+    <p class="muted">Page publique : ajoute tes paris. Les mises sont de 5 à 100 PO par catégorie.</p>
     <p><span class="link" id="goAdmin">Aller à l'espace admin</span></p>
   </div>
 
   <div class="card" id="betForm">
-    <h2>Ajouter un parieur et ses paris</h2>
+    <h2>Parieur : <span id="currentBettor"></span></h2>
     <div style="display:flex;gap:12px;align-items:center">
       <div style="flex:1">
         <label>Pseudo du parieur</label>
         <input id="bettorName" placeholder="Pseudo...">
       </div>
       <div style="width:140px">
-        <label>Total déjà mis (affiché)</label>
+        <label>Total déjà mis</label>
         <div id="bettorTotal" class="muted">0 PO</div>
       </div>
     </div>
 
     <hr style="margin:10px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)">
 
+    <!-- Boss atteint -->
     <div class="card" style="background:#071224">
       <h3>1) Jusqu'à quel boss on arrive</h3>
       <label><input type="checkbox" id="bet_boss_enable"> Je veux parier sur le boss atteint</label>
@@ -87,9 +101,10 @@
       </div>
     </div>
 
+    <!-- Wipe boss -->
     <div class="card" style="background:#071224">
       <h3>💀 Quel boss fera le wipe ?</h3>
-      <label><input type="checkbox" id="bet_wipe_enable"> Je parie sur le boss du wipe</label>
+      <label><input type="checkbox" id="bet_wipe_enable"> Je veux parier sur le boss du wipe</label>
       <div id="bet_wipe_block" class="hidden">
         <label>Boss prévu</label>
         <select id="bet_wipe_select"></select>
@@ -98,163 +113,132 @@
       </div>
     </div>
 
-    <!-- Les autres catégories (morts, top3, item) gardées inchangées -->
-
+    <!-- Ajouter le parieur -->
     <div style="margin-top:10px">
-      <button id="addBettor" class="primary">Ajouter le parieur</button>
+      <button id="addBettor" class="primary">Ajouter le pari</button>
     </div>
   </div>
 
   <!-- Parieurs enregistrés -->
   <div class="card">
-    <h2>Parieurs enregistrés</h2>
+    <h2>Leaderboard</h2>
     <div class="muted">Cagnotte totale = somme des mises placées sur toutes les catégories.</div>
     <div style="margin-top:8px">Total cagnotte: <strong id="totalPot">0 PO</strong></div>
-    <table id="bettorsTable"><thead><tr><th>Pseudo</th><th>Mises (détail)</th><th>Total mis</th><th>Actions</th></tr></thead><tbody></tbody></table>
-    <div style="margin-top:8px"><button id="clearAll">Supprimer tous les parieurs</button></div>
+    <table id="bettorsTable">
+      <thead><tr><th>Pseudo</th><th>Mises</th><th>Total mis</th><th>Actions</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div style="margin-top:8px"><button id="clearAll">Supprimer tous les paris</button></div>
   </div>
 </div>
 
 <script>
-  const bosses = ["Razorgore","Vaelastrasz","Broodlord","Firemaw","Ebonroc","Flamegor","Chromaggus","Nefarian"];
-  const items = ["Help of endless rage","Maladath","Rejuvenating gem","Shadow wing focus staff","Drake fang","Dragon's touch","Ashje'thul","RIEN DU TOUT"];
-  const LS_KEY = 'bwl_bets_v1';
+// --- CONFIG
+const bosses = ["Razorgore","Vaelastrasz","Broodlord","Firemaw","Ebonroc","Flamegor","Chromaggus","Nefarian"];
+const LS_KEY = 'bwl_bets_v2';
 
-  // --- init selects
-  const betBossSelect = document.getElementById('bet_boss_select');
-  const betWipeSelect = document.getElementById('bet_wipe_select');
-  bosses.forEach(b=>{ 
-    const o=document.createElement('option'); 
-    o.value=b; o.textContent=b; 
-    betBossSelect.appendChild(o); 
-    const ow=document.createElement('option'); 
-    ow.value=b; ow.textContent=b; 
-    betWipeSelect.appendChild(ow);
+// --- INIT
+const betBossSelect = document.getElementById('bet_boss_select');
+const betWipeSelect = document.getElementById('bet_wipe_select');
+bosses.forEach(b=>{
+  const o1=document.createElement('option'); o1.value=b; o1.textContent=b; betBossSelect.appendChild(o1);
+  const o2=document.createElement('option'); o2.value=b; o2.textContent=b; betWipeSelect.appendChild(o2);
+});
+
+// toggle blocks
+function toggleBlock(checkboxId, blockId){
+  const cb = document.getElementById(checkboxId), block = document.getElementById(blockId);
+  cb.addEventListener('change', ()=>{ block.classList.toggle('hidden', !cb.checked) });
+}
+toggleBlock('bet_boss_enable','bet_boss_block');
+toggleBlock('bet_wipe_enable','bet_wipe_block');
+
+// --- STORAGE
+let bettors = JSON.parse(localStorage.getItem(LS_KEY)||'[]');
+function save(){ localStorage.setItem(LS_KEY, JSON.stringify(bettors)) }
+function computeTotalPot(){ return bettors.reduce((sum,p)=>sum + (p.stakes?p.stakes.reduce((a,b)=>a+b.amount,0):0),0) }
+
+// --- UPDATE TABLE
+function updateTable(){
+  const tbody = document.querySelector('#bettorsTable tbody'); tbody.innerHTML='';
+  bettors.forEach((p,idx)=>{
+    const stakesDetail = (p.stakes||[]).map(s=>`${s.cat}: ${s.pred} (${s.amount} PO)`).join('<br>');
+    const total = (p.stakes||[]).reduce((a,b)=>a+b.amount,0);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${p.name}</td><td>${stakesDetail}</td><td>${total} PO</td><td><button data-i='${idx}' class='remove'>Suppr</button></td>`;
+    tbody.appendChild(tr);
   });
+  document.getElementById('totalPot').textContent = computeTotalPot() + ' PO';
+  document.querySelectorAll('.remove').forEach(btn=>btn.addEventListener('click',e=>{ bettors.splice(+e.target.dataset.i,1); save(); updateTable() }));
+}
+updateTable();
 
-  // toggle blocks
-  function toggleBlock(checkboxId, blockId){
-    const cb = document.getElementById(checkboxId), block = document.getElementById(blockId);
-    cb.addEventListener('change', ()=>{ block.classList.toggle('hidden', !cb.checked) });
-  }
-  toggleBlock('bet_boss_enable','bet_boss_block');
-  toggleBlock('bet_wipe_enable','bet_wipe_block');
+// --- LOGIN
+const loginPage=document.getElementById('loginPage');
+const betPage=document.getElementById('betPage');
+let currentBettor='';
+document.getElementById('loginBtn').addEventListener('click', ()=>{
+  const name=document.getElementById('loginName').value.trim();
+  if(!name){ alert('Donne un pseudo.'); return; }
+  currentBettor=name;
+  document.getElementById('currentBettor').textContent=currentBettor;
+  loginPage.classList.add('hidden');
+  betPage.classList.remove('hidden');
+  document.getElementById('bettorName').value=currentBettor;
+});
 
-  // bettors storage
-  let bettors = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+// --- ADD BET
+let betsClosed=false;
+function setBetsClosed(state){
+  betsClosed=state;
+  document.getElementById('closedMessage').classList.toggle('hidden', !state);
+  document.querySelectorAll('#betForm input,#betForm select,#betForm button').forEach(el=>{ if(el.id!=='addBettor') el.disabled=state; });
+}
+document.getElementById('addBettor').addEventListener('click', ()=>{
+  if(betsClosed){ alert('Les paris sont fermés pour ce raid !'); return; }
+  const name=document.getElementById('bettorName').value.trim();
+  if(!name){ alert('Donne un pseudo.'); return; }
+  const stakes=[];
+  if(document.getElementById('bet_boss_enable').checked){ stakes.push({cat:'bossReached',pred:betBossSelect.value,amount:parseInt(document.getElementById('bet_boss_stake').value||0)}); }
+  if(document.getElementById('bet_wipe_enable').checked){ stakes.push({cat:'wipeBoss',pred:betWipeSelect.value,amount:parseInt(document.getElementById('bet_wipe_stake').value||0)}); }
+  if(stakes.length===0){ alert('Au moins un pari doit être placé.'); return; }
+  bettors.push({name,stakes}); save(); updateTable();
+  alert('Pari ajouté !');
+});
 
-  function save(){ localStorage.setItem(LS_KEY, JSON.stringify(bettors)) }
+// --- CLEAR ALL
+document.getElementById('clearAll').addEventListener('click', ()=>{ if(confirm('Supprimer tous les paris ?')){ bettors=[]; save(); updateTable() } });
 
-  function computeTotalPot(){
-    return bettors.reduce((sum,p)=> sum + (p.stakes ? p.stakes.reduce((a,b)=>a+b.amount,0) : 0), 0)
-  }
-
-  function updateTable(){
-    const tbody = document.querySelector('#bettorsTable tbody'); tbody.innerHTML='';
-    bettors.forEach((p,idx)=>{
-      const stakesDetail = (p.stakes||[]).map(s=>`${s.cat}: ${s.pred ?? ''} (${s.amount} PO)`).join('<br>');
-      const total = (p.stakes||[]).reduce((a,b)=>a+b.amount,0);
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${p.name}</td><td>${stakesDetail}</td><td>${total} PO</td><td><button data-i='${idx}' class='remove'>Suppr</button></td>`;
-      tbody.appendChild(tr);
-    });
-    document.getElementById('totalPot').textContent = computeTotalPot() + ' PO';
-    document.querySelectorAll('.remove').forEach(btn=>btn.addEventListener('click',e=>{ bettors.splice(+e.target.dataset.i,1); save(); updateTable() }));
-  }
-
-  // add bettor
-  document.getElementById('addBettor').addEventListener('click', ()=>{
-    if(window.betsClosed){ alert('Les paris sont fermés pour ce raid !'); return }
-
-    const name = document.getElementById('bettorName').value.trim();
-    if(!name){ alert('Donne un pseudo pour le parieur.'); return }
-    const stakes = [];
-
-    // boss reached
-    if(document.getElementById('bet_boss_enable').checked){
-      stakes.push({cat:'bossReached', pred:betBossSelect.value, amount:parseInt(document.getElementById('bet_boss_stake').value||0)});
-    }
-
-    // wipe boss
-    if(document.getElementById('bet_wipe_enable').checked){
-      stakes.push({cat:'wipeBoss', pred:betWipeSelect.value, amount:parseInt(document.getElementById('bet_wipe_stake').value||0)});
-    }
-
-    if(stakes.length===0){ alert('Au moins un pari doit être placé.'); return }
-
-    bettors.push({name, stakes});
-    save(); updateTable();
-    document.getElementById('bettorName').value='';
-    document.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.checked=false);
-    document.querySelectorAll('.hidden').forEach(el=>el.classList.add('hidden'));
+// --- ADMIN
+document.getElementById('goAdmin').addEventListener('click', ()=>{ openAdmin(); });
+function openAdmin(){
+  const overlay=document.createElement('div'); overlay.style.position='fixed'; overlay.style.left=0; overlay.style.top=0; overlay.style.right=0; overlay.style.bottom=0;
+  overlay.style.background='rgba(0,0,0,0.7)'; overlay.style.zIndex=9999; overlay.id='adminOverlay';
+  const panel=document.createElement('div'); panel.className='card'; panel.style.maxWidth='600px'; panel.style.margin='60px auto'; panel.style.background='#041026';
+  panel.innerHTML=`
+    <h2>Admin — connexion</h2>
+    <label>Identifiant</label><input id='adm_user' placeholder='identifiant'>
+    <label>Mot de passe</label><input id='adm_pass' type='password'>
+    <div style='margin-top:10px'>
+      <button id='adm_login' class='primary'>Se connecter</button>
+      <button id='adm_close' class='primary'>Fermer</button>
+    </div>
+    <div id='adminPanel' class='hidden' style='margin-top:10px'>
+      <button id='closeBets' class='primary'>🔐 Fermer les paris</button>
+      <button id='openBets' class='primary'>Ouvrir les paris</button>
+    </div>
+  `;
+  overlay.appendChild(panel); document.body.appendChild(overlay);
+  panel.querySelector('#adm_close').addEventListener('click', ()=>{ document.body.removeChild(overlay); });
+  panel.querySelector('#adm_login').addEventListener('click', ()=>{
+    const u=panel.querySelector('#adm_user').value, p=panel.querySelector('#adm_pass').value;
+    if(u==='dork' && p==='BWLDORK'){ panel.querySelector('#adm_login').classList.add('hidden'); panel.querySelector('#adminPanel').classList.remove('hidden'); }
+    else alert('Identifiant ou mot de passe incorrect');
   });
-
-  document.getElementById('clearAll').addEventListener('click', ()=>{ if(confirm('Supprimer tous les parieurs ?')){ bettors=[]; save(); updateTable() } })
-  updateTable();
-
-  // --- Mode paris fermés
-  window.betsClosed = false;
-  function setBetsClosed(state){
-    window.betsClosed = state;
-    document.getElementById('closedMessage').classList.toggle('hidden', !state);
-    document.querySelectorAll('#betForm input, #betForm select, #betForm button').forEach(el=>{
-      if(el.id!=='addBettor') el.disabled = state;
-    });
-  }
-
-  // Admin SPA routing
-  document.getElementById('goAdmin').addEventListener('click', ()=>{ location.hash='admin' })
-  window.addEventListener('hashchange', ()=>{
-    if(location.hash==='#admin') openAdmin();
-  })
-
-  function openAdmin(){
-    const overlay = document.createElement('div')
-    overlay.style.position='fixed'; overlay.style.left=0; overlay.style.top=0; overlay.style.right=0; overlay.style.bottom=0;
-    overlay.style.background='rgba(0,0,0,0.7)'; overlay.style.zIndex=9999; overlay.id='adminOverlay'
-    const panel = document.createElement('div'); panel.className='card'; panel.style.maxWidth='900px'; panel.style.margin='60px auto'; panel.style.background='#041026'
-    panel.innerHTML = `
-      <h2>Admin — connexion</h2>
-      <div id='adminLogin'>
-        <label>Identifiant</label><input id='adm_user' placeholder='identifiant'>
-        <label>Mot de passe</label><input id='adm_pass' type='password' placeholder='mot de passe'>
-        <div style='margin-top:10px'>
-          <button id='adm_login' class='primary'>Se connecter</button>
-          <button id='adm_close'>Fermer</button>
-        </div>
-      </div>
-      <div id='adminPanel' class='hidden'>
-        <h3>Administration</h3>
-        <button id='closeBets' class='primary'>🔐 Fermer les paris</button>
-        <button id='openBets' class='primary'>Ouvrir les paris</button>
-        <div style='margin-top:10px'>
-          <button id='admin_logout' class='primary'>Se déconnecter</button>
-        </div>
-      </div>
-    `;
-    overlay.appendChild(panel); document.body.appendChild(overlay);
-
-    panel.querySelector('#adm_close').addEventListener('click', ()=>{ document.body.removeChild(overlay); location.hash='' })
-    panel.querySelector('#adm_login').addEventListener('click', ()=>{
-      const u = panel.querySelector('#adm_user').value, p = panel.querySelector('#adm_pass').value;
-      if(u==='dork' && p==='BWLDORK'){
-        panel.querySelector('#adminLogin').classList.add('hidden')
-        panel.querySelector('#adminPanel').classList.remove('hidden')
-      } else alert('Identifiant ou mot de passe incorrect')
-    })
-
-    panel.querySelector('#admin_logout').addEventListener('click', ()=>{
-      panel.querySelector('#adminPanel').classList.add('hidden')
-      panel.querySelector('#adminLogin').classList.remove('hidden')
-    })
-
-    panel.querySelector('#closeBets').addEventListener('click', ()=>{ setBetsClosed(true) })
-    panel.querySelector('#openBets').addEventListener('click', ()=>{ setBetsClosed(false) })
-
-    overlay.addEventListener('click', (e)=>{ if(e.target===overlay){ document.body.removeChild(overlay); location.hash='' } })
-  }
-
-  if(location.hash==='#admin') openAdmin();
+  panel.querySelector('#closeBets').addEventListener('click', ()=>{ setBetsClosed(true); });
+  panel.querySelector('#openBets').addEventListener('click', ()=>{ setBetsClosed(false); });
+  overlay.addEventListener('click',(e)=>{if(e.target===overlay)document.body.removeChild(overlay)});
+}
 </script>
 </body>
 </html>
